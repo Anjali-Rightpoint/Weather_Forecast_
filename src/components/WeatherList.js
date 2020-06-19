@@ -34,7 +34,7 @@ class WeatherList extends Component {
           <View style={styles.headerContainerStyle}>
             <Text style={styles.headingStyle}> {this.props.city} </Text>
           </View>
-          <TodayData todayWeather={this.props.todayWeather} />
+          <TodayData weatherModel={this.props.todayWeather[0]} />
           <FlatList
             showsHorizontalScrollIndicator={false}
             horizontal
@@ -45,6 +45,7 @@ class WeatherList extends Component {
                 <ForecastData
                   weatherInfo={this.props.dataaa[item][1]}
                   completeInfo={this.props.dataaa[item]}
+                  city={this.props.city}
                 />
               );
             }}

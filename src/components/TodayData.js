@@ -9,15 +9,15 @@ class TodayData extends Component {
     return (
       <View style={containerStyle}>
         <Image
-          source={{uri: this.props.todayWeather[0].imageUrl}}
+          source={{uri: this.props.weatherModel.imageUrl}}
           style={{width: 100, height: 100}}
         />
         <Text style={todayTempStyle}>
-          {this.props.todayWeather[0].currentTemp}&deg;
+          {this.props.weatherModel.currentTemp}&deg;
         </Text>
-        <Text style={textStyle}> {this.props.todayWeather[0].desc}</Text>
+        <Text style={textStyle}> {this.props.weatherModel.desc}</Text>
         <Text style={headingStyle}> Humidity </Text>
-        <Text style={textStyle}> {this.props.todayWeather[0].humidity}</Text>
+        <Text style={textStyle}> {this.props.weatherModel.humidity}</Text>
       </View>
     );
   }
@@ -32,7 +32,7 @@ const styles = StyleSheet.create({
   containerStyle: {
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 100,
+    marginBottom: 50,
   },
   textStyle: {
     fontSize: 20,

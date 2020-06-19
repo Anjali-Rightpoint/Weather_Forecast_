@@ -9,7 +9,11 @@ import {
 
 class ForecastData extends Component {
   onRowPress() {
-    Actions.weatherDetail({weatherInfo: this.props.completeInfo});
+    Actions.weatherDetail({
+      weatherInfo: this.props.completeInfo,
+      city: this.props.city,
+      title: this.props.city,
+    });
   }
   render() {
     const {
