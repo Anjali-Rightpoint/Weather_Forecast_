@@ -17,8 +17,8 @@ const RouterComponent = () => {
           </Scene>
           <Scene key="main">
             <Scene
-              rightTitle="Explore"
-              onRight={() => Actions.search()}
+              // rightTitle="Explore"
+              // onRight={() => Actions.search()}
               key="weather"
               component={WeatherList}
               title="Weather Forecast"

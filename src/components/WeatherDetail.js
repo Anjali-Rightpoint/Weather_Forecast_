@@ -11,39 +11,25 @@ import TodayData from './TodayData';
 
 class WeatherDetail extends Component {
   render() {
+    const {containerStyle, listContainerStyle, imageStyle} = styles;
     return (
       <View>
         <View>
           <Text style={styles.headingStyle}>
             {this.props.weatherInfo[1].displayDay}
           </Text>
-
           <TodayData weatherModel={this.props.weatherInfo[1]} />
         </View>
 
         <FlatList
-          style={styles.containerStyle}
+          style={containerStyle}
           data={this.props.weatherInfo}
           keyExtractor={item => item.dt_txt}
           renderItem={({item}) => {
             return (
-              <View
-                style={{
-                  paddingVertical: 10,
-                  flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  paddingHorizontal: '15%',
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  borderColor: 'gray',
-                  margin: 5,
-                }}>
+              <View style={listContainerStyle}>
                 <Text style={{color: 'white'}}> {item.displayTime} </Text>
-
-                <Image
-                  source={{uri: item.imageUrl}}
-                  style={{width: 30, height: 30}}
-                />
+                <Image source={{uri: item.imageUrl}} style={imageStyle} />
                 <Text style={{color: 'white'}}> {item.currentTemp}&deg; </Text>
               </View>
             );
@@ -78,6 +64,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     margin: 20,
     borderRadius: 10,
+  },
+  listContainerStyle: {
+    paddingVertical: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: '15%',
+    borderWidth: 1,
+    borderRadius: 5,
+    borderColor: 'gray',
+    margin: 5,
+  },
+  imageStyle: {
+    width: 30,
+    height: 30,
   },
 });
 

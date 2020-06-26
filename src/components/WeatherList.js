@@ -6,26 +6,94 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
+  Button,
+  PermissionsAndroid,
 } from 'react-native';
 import {Spinner, Header} from './common';
-// import {ScrollView} from 'react-native-gesture-handler';
 import {fetchWeatherData} from '../actions';
 import {connect, Provider} from 'react-redux';
 import TodayData from './TodayData';
 import ForecastData from './ForecastData';
 import {Actions} from 'react-native-router-flux';
+import WeatherModel from '../models/WeatherModel';
+import Geolocation from '@react-native-community/geolocation';
 
 class WeatherList extends Component {
-  state = {showLoader: false};
-  componentWillMount() {
-    this.props.fetchWeatherData();
+  state = {
+    showLoader: false,
+    coord: {lat: '30.3165', lng: '78.0322'},
+  };
+
+  getCurrentLocation() {
+    Geolocation.getCurrentPosition(
+      position => {
+        console.log('Position is:', position);
+        this.setState({
+          coord: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          },
+        });
+      },
+      error => {
+        console.log('map error: ', error);
+        console.log(error.code, error.message);
+      },
+    );
   }
 
+  fetchLocation() {
+    if (Platform.OS === 'ios') {
+      Geolocation.requestAuthorization();
+      this.getCurrentLocation();
+    } else {
+      console.log('Platform', Platform.OS);
+      const granted = PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      );
+
+      if (granted) {
+        console.log('You can use the ACCESS_FINE_LOCATION');
+        this.getCurrentLocation();
+      } else {
+        console.log('ACCESS_FINE_LOCATION permission denied');
+      }
+      // let granted = PermissionsAndroid.request(
+      //   PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+      //   {
+      //     title: 'App Geolocation Permission',
+      //     message: "App needs access to your phone's location.",
+      //   },
+      // );
+      // console.log('Value of granted', granted);
+      // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      //   this.getCurrentLocation();
+      // } else {
+      //   console.log('Location permission not granted!!!!');
+      // }
+    }
+  }
+
+  componentDidMount() {
+    this.fetchLocation();
+    this.props.navigation.setParams({handler: this.handler.bind(this)});
+
+    this.props.navigation.addListener('didFocus', payload => {
+      this.props.fetchWeatherData(this.state.coord);
+    });
+  }
   renderLoader() {
     return <Spinner size="large" />;
   }
 
+  handler(coords) {
+    console.log('came till here', this.state);
+    console.log('came till here coords', coords);
+    this.setState({coord: coords});
+  }
+
   render() {
+    console.log('called with', this.props);
     if (this.props.loading) {
       return <Spinner size="large" />;
     } else {
@@ -39,7 +107,7 @@ class WeatherList extends Component {
             showsHorizontalScrollIndicator={false}
             horizontal
             data={Object.keys(this.props.dataaa)}
-            keyExtractor={item => this.props.dataaa[item].time}
+            keyExtractor={item => this.props.dataaa[item].id}
             renderItem={({item}) => {
               return (
                 <ForecastData
@@ -55,6 +123,21 @@ class WeatherList extends Component {
     }
   }
 }
+WeatherList.navigationOptions = ({navigation}) => {
+  return {
+    title: 'Weather Forecast',
+    headerRight: (
+      <Button
+        title="Explore"
+        onPress={() =>
+          Actions.search({
+            handler: navigation.getParam('handler'),
+          })
+        }
+      />
+    ),
+  };
+};
 
 const mapStateToProps = state => {
   const weatherData = state.weatherData.data.list;
@@ -65,6 +148,7 @@ const mapStateToProps = state => {
     weatherModelArray = weatherData.map(
       element =>
         new WeatherModel(
+          element.dt,
           element.dt_txt,
           element.main.temp,
           element.main.humidity,
@@ -75,7 +159,7 @@ const mapStateToProps = state => {
         ),
     );
   }
-
+  console.log('id:', weatherModelArray);
   var dataaa = {};
   var todayWeather = {};
   var forecastedWeather = [];
@@ -117,67 +201,3 @@ export default connect(
   mapStateToProps,
   {fetchWeatherData},
 )(WeatherList);
-
-function WeatherModel(
-  date,
-  currentTemp,
-  humidity,
-  desc,
-  imageId,
-  minTemp,
-  maxTemp,
-) {
-  var days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ];
-
-  const monthNames = [
-    'January',
-    'February',
-    'March',
-    'April',
-    'May',
-    'June',
-    'July',
-    'August',
-    'September',
-    'October',
-    'November',
-    'December',
-  ];
-  this.date = date.split(' ')[0];
-  this.time = date.split(' ')[1];
-  this.currentTemp = currentTemp;
-  this.humidity = humidity;
-  this.desc = desc;
-  this.imageUrl = 'http://openweathermap.org/img/wn/' + imageId + '@2x.png';
-  this.minTemp = minTemp;
-  this.maxTemp = maxTemp;
-  this.displayDay = days[new Date(this.date).getDay()];
-  this.displayDate =
-    new Date(this.date).getDate().toString() +
-    ' ' +
-    monthNames[new Date(this.date).getMonth()];
-
-  this.displayTime = displayDateTime(date);
-}
-
-function displayDateTime(date1) {
-  var date = new Date(date1);
-  var hours =
-    Number(date.getHours()) > 12
-      ? Number(date.getHours()) - 12
-      : Number(date.getHours());
-  var am_pm = date.getHours() >= 12 ? 'PM' : 'AM';
-  hours = hours < 10 ? '0' + hours : hours;
-  var minutes =
-    date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes();
-  var time = hours.toString() + ':' + minutes.toString() + am_pm;
-  return time;
-}

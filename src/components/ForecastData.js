@@ -2,10 +2,7 @@ import React, {Component} from 'react';
 import {Text, View, StyleSheet, Image} from 'react-native';
 import {Card} from './common';
 import {Actions} from 'react-native-router-flux';
-import {
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-} from 'react-native-gesture-handler';
+import {TouchableOpacity, TouchableWithoutFeedback} from 'react-native';
 
 class ForecastData extends Component {
   onRowPress() {
@@ -27,32 +24,34 @@ class ForecastData extends Component {
 
     return (
       <TouchableWithoutFeedback onPress={this.onRowPress.bind(this)}>
-        <Card>
-          <Text style={dayStyle}>
-            {' '}
-            {this.props.weatherInfo.displayDay} ,{' '}
-            {this.props.weatherInfo.displayDate}
-          </Text>
-          <Text style={timeStyle}> {this.props.weatherInfo.displayTime}</Text>
-          <Image
-            source={{uri: this.props.weatherInfo.imageUrl}}
-            style={{
-              width: 60,
-              height: 60,
-            }}
-          />
-          <Text style={tempStyle}>
-            {this.props.weatherInfo.currentTemp}&deg;
-          </Text>
-          <View style={maxContainerStyle}>
-            <Text style={minTempStyle}>
-              {this.props.weatherInfo.minTemp}&deg;
+        <View>
+          <Card>
+            <Text style={dayStyle}>
+              {' '}
+              {this.props.weatherInfo.displayDay} ,{' '}
+              {this.props.weatherInfo.displayDate}
             </Text>
-            <Text style={maxTempStyle}>
-              {this.props.weatherInfo.maxTemp}&deg;
+            <Text style={timeStyle}> {this.props.weatherInfo.displayTime}</Text>
+            <Image
+              source={{uri: this.props.weatherInfo.imageUrl}}
+              style={{
+                width: 60,
+                height: 60,
+              }}
+            />
+            <Text style={tempStyle}>
+              {this.props.weatherInfo.currentTemp}&deg;
             </Text>
-          </View>
-        </Card>
+            <View style={maxContainerStyle}>
+              <Text style={minTempStyle}>
+                {this.props.weatherInfo.minTemp}&deg;
+              </Text>
+              <Text style={maxTempStyle}>
+                {this.props.weatherInfo.maxTemp}&deg;
+              </Text>
+            </View>
+          </Card>
+        </View>
       </TouchableWithoutFeedback>
     );
   }

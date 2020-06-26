@@ -9,8 +9,6 @@ import {Actions} from 'react-native-router-flux';
 class SplashScene extends Component {
   componentDidMount() {
     this.animation.play();
-  }
-  componentWillMount() {
     this.showHomeScreen();
   }
 
