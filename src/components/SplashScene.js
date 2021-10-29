@@ -14,8 +14,8 @@ class SplashScene extends Component {
 
   showHomeScreen() {
     setTimeout(function() {
-      Actions.main();
-    }, 4000);
+      Actions.tabBar();
+    }, 2000);
   }
 
   render() {

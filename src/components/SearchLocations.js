@@ -1,11 +1,18 @@
 import React, {Component} from 'react';
-import {Text, FlatList, View, Input, TouchableOpacity} from 'react-native';
+import {
+  Text,
+  FlatList,
+  View,
+  Input,
+  TouchableOpacity,
+  AsyncStorage,
+} from 'react-native';
 import SearchItem from './SearchItem';
 import {SearchBar} from 'react-native-elements';
 import {searchLocations, fetchWeatherData} from '../actions';
 import {connect, Provider} from 'react-redux';
 import {FlatListItemSeparator} from './common';
-import {Actions} from 'react-native-router-flux';
+import {Actions, ActionConst} from 'react-native-router-flux';
 
 class SearchLocation extends Component {
   state = {
@@ -14,13 +21,20 @@ class SearchLocation extends Component {
   };
 
   moveToMainScreen = (handler, item) => {
-    handler({lat: item._geoloc.lat, lng: item._geoloc.lng});
-    Actions.pop();
+    // handler({lat: item._geoloc.lat, lng: item._geoloc.lng});
+    // Actions.pop();
+    // Actions.tabBar({type: ActionConst.RESET});
+    // Actions.weather().handler({lat: item._geoloc.lat, lng: item._geoloc.lng});
+    AsyncStorage.setItem('lat', item._geoloc.lat.toString());
+    AsyncStorage.setItem('lng', item._geoloc.lng.toString());
+    // Actions.weather({testProp: 'AAA'});
+    Actions.weather();
   };
 
   constructor(props) {
     super(props);
     this.timeout = 0;
+    console.log('value of state', this.props.previousState);
   }
 
   updateSearch(search) {

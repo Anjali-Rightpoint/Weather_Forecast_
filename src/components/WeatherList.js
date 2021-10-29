@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+
 import {
   Text,
   View,
@@ -6,9 +7,11 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Button,
   PermissionsAndroid,
+  AsyncStorage,
+  Alert,
 } from 'react-native';
+import {Button} from 'react-native-elements';
 import {Spinner, Header} from './common';
 import {fetchWeatherData} from '../actions';
 import {connect, Provider} from 'react-redux';
@@ -17,6 +20,7 @@ import ForecastData from './ForecastData';
 import {Actions} from 'react-native-router-flux';
 import WeatherModel from '../models/WeatherModel';
 import Geolocation from '@react-native-community/geolocation';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 class WeatherList extends Component {
   state = {
@@ -58,19 +62,40 @@ class WeatherList extends Component {
       } else {
         console.log('ACCESS_FINE_LOCATION permission denied');
       }
-      // let granted = PermissionsAndroid.request(
-      //   PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-      //   {
-      //     title: 'App Geolocation Permission',
-      //     message: "App needs access to your phone's location.",
-      //   },
-      // );
-      // console.log('Value of granted', granted);
-      // if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      //   this.getCurrentLocation();
-      // } else {
-      //   console.log('Location permission not granted!!!!');
-      // }
+    }
+  }
+
+  async componentWillReceiveProps() {
+    const latitude = await AsyncStorage.getItem('lat');
+    const longitude = await AsyncStorage.getItem('lng');
+    if (
+      latitude !== this.state.coord.lat ||
+      longitude !== this.state.coord.lng
+    ) {
+      console.log('new props recieved2', latitude, longitude);
+      console.log('New obj:', {lat: latitude, lng: longitude});
+      this.setState({coord: {lat: latitude, lng: longitude}});
+      console.log('Updated state', this.state);
+      this.props.fetchWeatherData(this.state.coord);
+    } else {
+      // Need to add some handling here
+    }
+  }
+
+  async componentWillUpdate() {
+    const latitude = await AsyncStorage.getItem('lat');
+    const longitude = await AsyncStorage.getItem('lng');
+    if (
+      latitude !== this.state.coord.lat ||
+      longitude !== this.state.coord.lng
+    ) {
+      console.log('new props recieved2', latitude, longitude);
+      console.log('New obj:', {lat: latitude, lng: longitude});
+      this.setState({coord: {lat: latitude, lng: longitude}});
+      console.log('Updated state', this.state);
+      this.props.fetchWeatherData(this.state.coord);
+    } else {
+      console.log('This is a TADADADDADDDDDD');
     }
   }
 
@@ -92,6 +117,44 @@ class WeatherList extends Component {
     this.setState({coord: coords});
   }
 
+  async saveFavorites() {
+    let favoriteLocation = {
+      city: this.props.city,
+      lat: this.state.coord.lat,
+      lng: this.state.coord.lng,
+    };
+
+    const existingFavorites = await AsyncStorage.getItem('Favorites');
+
+    let newFavorite = JSON.parse(existingFavorites);
+    if (!newFavorite) {
+      newFavorite = [];
+    }
+    console.log(favoriteLocation);
+
+    const elementsIndex = newFavorite.findIndex(
+      element => element.city == this.props.city,
+    );
+    if (elementsIndex == -1) {
+      newFavorite.push(favoriteLocation);
+      await AsyncStorage.setItem('Favorites', JSON.stringify(newFavorite))
+        .then(() => {
+          console.log('saved succeffully');
+        })
+        .catch(() => {
+          console.log('some error occurred');
+        });
+    } else {
+      Alert.alert('Alert', 'This is already added to favorites', [
+        {
+          text: 'Okay',
+          onPress: () => console.log('Cancel Pressed'),
+          style: 'cancel',
+        },
+      ]);
+    }
+  }
+
   render() {
     console.log('called with', this.props);
     if (this.props.loading) {
@@ -102,6 +165,19 @@ class WeatherList extends Component {
           <View style={styles.headerContainerStyle}>
             <Text style={styles.headingStyle}> {this.props.city} </Text>
           </View>
+
+          <Button
+            icon={<Icon name="heart-o" size={20} color="white" />}
+            title="Add To Favorites"
+            onPress={this.saveFavorites.bind(this)}
+            iconRight={true}
+            style={{
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: 20,
+            }}
+          />
+
           <TodayData weatherModel={this.props.todayWeather[0]} />
           <FlatList
             showsHorizontalScrollIndicator={false}
@@ -123,21 +199,21 @@ class WeatherList extends Component {
     }
   }
 }
-WeatherList.navigationOptions = ({navigation}) => {
-  return {
-    title: 'Weather Forecast',
-    headerRight: (
-      <Button
-        title="Explore"
-        onPress={() =>
-          Actions.search({
-            handler: navigation.getParam('handler'),
-          })
-        }
-      />
-    ),
-  };
-};
+// WeatherList.navigationOptions = ({navigation}) => {
+//   return {
+//     title: 'Weather Forecast',
+//     headerRight: (
+//       <Button
+//         title="Explore"
+//         onPress={() =>
+//           Actions.search({
+//             handler: navigation.getParam('handler'),
+//           })
+//         }
+//       />
+//     ),
+//   };
+//};
 
 const mapStateToProps = state => {
   const weatherData = state.weatherData.data.list;
